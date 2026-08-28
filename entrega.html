@@ -335,7 +335,7 @@ if (objectCollage && !objectCollage.querySelector('.object-jeans')) {
   jeansCard.className = 'object-card object-jeans';
   jeansCard.type = 'button';
   jeansCard.dataset.object = 'Vaqueros a dos euros';
-  jeansCard.innerHTML = `<img src="${offlineAsset('assets/fotos/foto_87.jpg')}" data-source="foto_87.jpg" alt="Vaqueros a dos euros"><span>VAQUEROS <b>— escuchar</b></span>`;
+  jeansCard.innerHTML = `<img src="${offlineAsset('assets/fotos/foto_87.jpg')}" data-source="foto_87.jpg" alt="Vaqueros a dos euros" loading="lazy" decoding="async"><span>VAQUEROS <b>— escuchar</b></span>`;
   jeansCard.addEventListener('click', () => {
     const listening = !jeansCard.classList.contains('is-listening');
     if (listening) {
@@ -421,7 +421,7 @@ if (oldGalleryGrid) {
     item.dataset.category = source === 'fotoantigua1.jpg' ? 'objetos' : getPhotoCategory(number);
     item.dataset.title = legacyItem?.dataset.title || `Fotografía ${source.replace('.jpg', '').replace('.jpg', '')}`;
     item.dataset.caption = legacyItem?.dataset.caption || 'Imagen del archivo visual del Rastro.';
-    item.innerHTML = `<img src="${offlineAsset(`assets/fotos/${source}`)}" data-source="${source}" alt="${item.dataset.title}">`;
+    item.innerHTML = `<img src="${offlineAsset(`assets/fotos/${source}`)}" data-source="${source}" alt="${item.dataset.title}" loading="lazy" decoding="async">`;
     oldGalleryGrid.append(item);
   });
 }
@@ -496,7 +496,7 @@ archiveSlider?.addEventListener('input', () => {
   modernPhoto.parentElement.style.setProperty('--split-position', `${archiveSlider.value}%`);
 });
 
-const timeMarkup = `<section id="antiguedad" class="time-section" aria-label="Recorrido por fotografias antiguas"><div class="time-stage"><div class="time-heading"><span>09 / 11 · Archivo temporal</span><strong>Una memoria en capas</strong></div><div class="time-frame">${Array.from({ length: 7 }, (_, index) => `<img src="${offlineAsset(`assets/fotostiempo/antiguedad_${index + 1}.png`)}" data-source="antiguedad_${index + 1}.png" alt="Fotografia antigua del Rastro, imagen ${index + 1}" class="time-photo${index === 0 ? ' is-visible' : ''}">`).join('')}<span class="time-counter">01 / 07</span></div><p class="time-instruction">Continua bajando para revelar el paso del tiempo <span>↓</span></p></div></section>`;
+const timeMarkup = `<section id="antiguedad" class="time-section" aria-label="Recorrido por fotografias antiguas"><div class="time-stage"><div class="time-heading"><span>09 / 11 · Archivo temporal</span><strong>Una memoria en capas</strong></div><div class="time-frame">${Array.from({ length: 7 }, (_, index) => `<img src="${offlineAsset(`assets/fotostiempo/antiguedad_${index + 1}.png`)}" data-source="antiguedad_${index + 1}.png" alt="Fotografia antigua del Rastro, imagen ${index + 1}" class="time-photo${index === 0 ? ' is-visible' : ''}" loading="lazy" decoding="async">`).join('')}<span class="time-counter">01 / 07</span></div><p class="time-instruction">Continua bajando para revelar el paso del tiempo <span>↓</span></p></div></section>`;
 const miradaSection = document.querySelector('#mirada');
 miradaSection?.insertAdjacentHTML('beforebegin', timeMarkup);
 const timeSection = document.querySelector('.time-section');
