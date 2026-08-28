@@ -15,6 +15,10 @@ const textCorrections = [
 // esta función por el Data URI correspondiente antes de cargar este script.
 const offlineAsset = window.offlineAsset || ((asset) => asset);
 const imageFileName = (image) => image.dataset.source || image.src.split('/').pop().toLowerCase();
+const isPackagedOffline = Boolean(window.offlineAssets);
+const photoThumbnail = (source) => isPackagedOffline ? offlineAsset(`assets/fotos/${source}`) : `assets/imagenes-web/miniaturas/${source}`;
+const photoLarge = (source) => isPackagedOffline ? offlineAsset(`assets/fotos/${source}`) : `assets/imagenes-web/grandes/${source}`;
+const temporalPhoto = (number) => isPackagedOffline ? offlineAsset(`assets/fotostiempo/antiguedad_${number}.png`) : `assets/imagenes-web/archivo-temporal/antiguedad_${number}.jpg`;
 
 const correctRenderedText = () => {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -84,7 +88,7 @@ if (objectCollage && !objectCollage.querySelector('.object-jeans')) {
   jeansCard.className = 'object-card object-jeans';
   jeansCard.type = 'button';
   jeansCard.dataset.object = 'Vaqueros a dos euros';
-  jeansCard.innerHTML = `<img src="${offlineAsset('assets/fotos/foto_87.jpg')}" data-source="foto_87.jpg" alt="Vaqueros a dos euros" loading="lazy" decoding="async"><span>VAQUEROS <b>— escuchar</b></span>`;
+  jeansCard.innerHTML = `<img src="${photoThumbnail('foto_87.jpg')}" data-full="${photoLarge('foto_87.jpg')}" data-source="foto_87.jpg" alt="Vaqueros a dos euros" loading="lazy" decoding="async"><span>VAQUEROS <b>— escuchar</b></span>`;
   jeansCard.addEventListener('click', () => {
     const listening = !jeansCard.classList.contains('is-listening');
     if (listening) {
@@ -110,7 +114,7 @@ const modal = document.querySelector('.modal');
 const modalImage = modal?.querySelector('img');
 document.querySelectorAll('.gallery-item').forEach((item) => item.addEventListener('click', () => {
   if (!modal || !modalImage) return;
-  modalImage.src = item.querySelector('img').src;
+  modalImage.src = item.querySelector('img').dataset.full || item.querySelector('img').src;
   modalImage.alt = item.querySelector('img').alt;
   modal.querySelector('[data-modal-title]').textContent = item.dataset.title;
   modal.querySelector('[data-modal-caption]').textContent = item.dataset.caption;
@@ -170,7 +174,7 @@ if (oldGalleryGrid) {
     item.dataset.category = source === 'fotoantigua1.jpg' ? 'objetos' : getPhotoCategory(number);
     item.dataset.title = legacyItem?.dataset.title || `Fotografía ${source.replace('.jpg', '').replace('.jpg', '')}`;
     item.dataset.caption = legacyItem?.dataset.caption || 'Imagen del archivo visual del Rastro.';
-    item.innerHTML = `<img src="${offlineAsset(`assets/fotos/${source}`)}" data-source="${source}" alt="${item.dataset.title}" loading="lazy" decoding="async">`;
+    item.innerHTML = `<img src="${photoThumbnail(source)}" data-full="${photoLarge(source)}" data-source="${source}" alt="${item.dataset.title}" loading="lazy" decoding="async">`;
     oldGalleryGrid.append(item);
   });
 }
@@ -214,12 +218,12 @@ if (gallerySection && oldGalleryGrid) {
         caption.textContent = item.dataset.title;
         figure.tabIndex = 0;
         figure.append(image, caption);
-        const selectImage = () => { featuredImage.src = image.src; featuredImage.alt = image.alt; featuredTitle.textContent = item.dataset.title; featuredHint.textContent = 'Seleccionada · ampliar'; document.querySelector('.category-featured')?.classList.add('is-focused'); };
+        const selectImage = () => { featuredImage.src = image.dataset.full || image.src; featuredImage.alt = image.alt; featuredTitle.textContent = item.dataset.title; featuredHint.textContent = 'Seleccionada · ampliar'; document.querySelector('.category-featured')?.classList.add('is-focused'); };
         figure.addEventListener('click', selectImage);
         figure.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectImage(); } });
         imageList.append(figure);
       });
-      if (matchingItems[0]) { featuredImage.src = matchingItems[0].querySelector('img').src; featuredImage.alt = matchingItems[0].querySelector('img').alt; featuredTitle.textContent = matchingItems[0].dataset.title; featuredHint.textContent = 'Seleccionada · ampliar'; }
+      if (matchingItems[0]) { const firstImage = matchingItems[0].querySelector('img'); featuredImage.src = firstImage.dataset.full || firstImage.src; featuredImage.alt = firstImage.alt; featuredTitle.textContent = matchingItems[0].dataset.title; featuredHint.textContent = 'Seleccionada · ampliar'; }
       categoryDialog.showModal();
     });
     categoryGrid.append(card);
@@ -245,7 +249,7 @@ archiveSlider?.addEventListener('input', () => {
   modernPhoto.parentElement.style.setProperty('--split-position', `${archiveSlider.value}%`);
 });
 
-const timeMarkup = `<section id="antiguedad" class="time-section" aria-label="Recorrido por fotografias antiguas"><div class="time-stage"><div class="time-heading"><span>09 / 11 · Archivo temporal</span><strong>Una memoria en capas</strong></div><div class="time-frame">${Array.from({ length: 7 }, (_, index) => `<img src="${offlineAsset(`assets/fotostiempo/antiguedad_${index + 1}.png`)}" data-source="antiguedad_${index + 1}.png" alt="Fotografia antigua del Rastro, imagen ${index + 1}" class="time-photo${index === 0 ? ' is-visible' : ''}" loading="eager" decoding="async">`).join('')}<span class="time-counter">01 / 07</span></div><p class="time-instruction">Continua bajando para revelar el paso del tiempo <span>↓</span></p></div></section>`;
+const timeMarkup = `<section id="antiguedad" class="time-section" aria-label="Recorrido por fotografias antiguas"><div class="time-stage"><div class="time-heading"><span>09 / 11 · Archivo temporal</span><strong>Una memoria en capas</strong></div><div class="time-frame">${Array.from({ length: 7 }, (_, index) => `<img src="${temporalPhoto(index + 1)}" data-source="antiguedad_${index + 1}.jpg" alt="Fotografia antigua del Rastro, imagen ${index + 1}" class="time-photo${index === 0 ? ' is-visible' : ''}" loading="eager" decoding="async">`).join('')}<span class="time-counter">01 / 07</span></div><p class="time-instruction">Continua bajando para revelar el paso del tiempo <span>↓</span></p></div></section>`;
 const miradaSection = document.querySelector('#mirada');
 miradaSection?.insertAdjacentHTML('beforebegin', timeMarkup);
 const timeSection = document.querySelector('.time-section');
