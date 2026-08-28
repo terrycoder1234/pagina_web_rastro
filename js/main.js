@@ -1,6 +1,6 @@
 const textCorrections = [
   [/tambien/g, 'también'], [/todavia/g, 'todavía'], [/pense/g, 'pensé'], [/llamo/g, 'llamó'], [/atencion/g, 'atención'],
-  [/musica/g, 'música'], [/esta/g, 'está'], [/pequeno/g, 'pequeño'], [/pequenos/g, 'pequeños'], [/accion/g, 'acción'],
+  [/musica/g, 'música'], [/esta/g, 'está'], [/pequenos/g, 'pequeños'], [/pequeno/g, 'pequeño'], [/accion/g, 'acción'],
   [/intencion/g, 'intención'], [/fotografia/g, 'fotografía'], [/fotografias/g, 'fotografías'], [/Camaras/g, 'Cámaras'],
   [/analogicas/g, 'analógicas'], [/decadas/g, 'décadas'], [/Album/g, 'Álbum'], [/album/g, 'álbum'], [/Munecas/g, 'Muñecas'], [/MUNECAS/g, 'MUÑECAS'],
   [/munecas/g, 'muñecas'], [/imagenes/g, 'imágenes'], [/anos/g, 'años'], [/Aqui/g, 'Aquí'], [/aqui/g, 'aquí'],
@@ -11,6 +11,11 @@ const textCorrections = [
   [/mercancia/g, 'mercancía'], [/Camaras/g, 'Cámaras'], [/CAMARA/g, 'CÁMARA'], [/CAMARAS/g, 'CÁMARAS']
 ];
 
+// En la web normal devuelve la ruta local; la versión autocontenida sustituye
+// esta función por el Data URI correspondiente antes de cargar este script.
+const offlineAsset = window.offlineAsset || ((asset) => asset);
+const imageFileName = (image) => image.dataset.source || image.src.split('/').pop().toLowerCase();
+
 const correctRenderedText = () => {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   const textNodes = [];
@@ -20,6 +25,26 @@ const correctRenderedText = () => {
 };
 
 correctRenderedText();
+
+const personalLook = document.querySelector('#mirada .look-inner > div');
+if (personalLook) {
+  personalLook.querySelectorAll('p:not(.section-mark)').forEach((paragraph) => paragraph.remove());
+  const paragraphs = [
+    'Durante este proyecto recibí malas noticias sobre mi abuelo y, sin darme cuenta, todo empezó a llevarme hacia él.',
+    'Aunque ya estaba ciego, le encantaba escuchar música y la radio. Siempre fue una persona muy alegre: le gustaba bailar, reírse y llenar los espacios con su presencia. Pensar en él me hizo entender que muchas veces también recordamos a las personas por sus sonidos.',
+    'Por eso decidí hacer este proyecto desde el sonido. Porque así como las voces dejan rastro en El Rastro, mi abuelo también dejó uno en mí, en sus risas, en la música y en todo lo que me enseñó.'
+  ];
+  paragraphs.forEach((text, index) => {
+    const paragraph = document.createElement('p');
+    paragraph.className = index === 0 ? 'lead dedication-copy' : 'dedication-copy';
+    paragraph.textContent = text;
+    personalLook.append(paragraph);
+  });
+  const note = document.createElement('p');
+  note.className = 'dedication-note';
+  note.textContent = 'Para mi abuelo, que me enseñó a cantar, a bailar y a llenar la vida de música.';
+  personalLook.append(note);
+}
 
 const menuToggle = document.querySelector('.menu-toggle');
 const siteNavigation = document.querySelector('#site-navigation');
@@ -59,7 +84,7 @@ if (objectCollage && !objectCollage.querySelector('.object-jeans')) {
   jeansCard.className = 'object-card object-jeans';
   jeansCard.type = 'button';
   jeansCard.dataset.object = 'Vaqueros a dos euros';
-  jeansCard.innerHTML = '<img src="assets/fotos/foto_87.JPG" alt="Vaqueros a dos euros"><span>VAQUEROS <b>— escuchar</b></span>';
+  jeansCard.innerHTML = `<img src="${offlineAsset('assets/fotos/foto_87.jpg')}" data-source="foto_87.jpg" alt="Vaqueros a dos euros"><span>VAQUEROS <b>— escuchar</b></span>`;
   jeansCard.addEventListener('click', () => {
     const listening = !jeansCard.classList.contains('is-listening');
     if (listening) {
@@ -105,14 +130,14 @@ document.querySelectorAll('.filter').forEach((filter) => filter.addEventListener
 }));
 
 const galleryGroups = {
-  'foto_36.JPG': 'multitud',
-  'foto_57.JPG': 'multitud',
-  'foto_24.JPG': 'objetos',
-  'foto_28.JPG': 'voces-oficios',
-  'foto_22.JPG': 'multitud',
-  'foto_44.JPG': 'voces-oficios',
-  'foto_20.JPG': 'objetos',
-  'foto_121.JPG': 'objetos'
+  'foto_36.jpg': 'multitud',
+  'foto_57.jpg': 'multitud',
+  'foto_24.jpg': 'objetos',
+  'foto_28.jpg': 'voces-oficios',
+  'foto_22.jpg': 'multitud',
+  'foto_44.jpg': 'voces-oficios',
+  'foto_20.jpg': 'objetos',
+  'foto_121.jpg': 'objetos'
 };
 const galleryFilters = [...document.querySelectorAll('.filter')];
 galleryFilters.slice(4).forEach((filter) => { filter.hidden = true; });
@@ -122,7 +147,7 @@ if (thirdFilter) {
   thirdFilter.textContent = 'Voces y oficios';
 }
 document.querySelectorAll('.gallery-item').forEach((item) => {
-  const fileName = item.querySelector('img').src.split('/').pop();
+  const fileName = imageFileName(item.querySelector('img'));
   if (galleryGroups[fileName]) item.dataset.category = galleryGroups[fileName];
 });
 
@@ -133,27 +158,27 @@ const legacyGalleryItems = [...document.querySelectorAll('.gallery-item')];
 const objectNumbers = new Set([8, 10, 11, 12, 14, 15, 16, 18, 20, 21, 23, 24, 27, 66, 67, 69, 70, 72, 73, 75, 76, 77, 79, 80, 81, 82, 85, 94, 98, 101, 103, 104, 105, 108, 109, 110, 111, 113, 115, 121, 123]);
 const crowdNumbers = new Set([22, 34, 35, 36, 41, 42, 51, 52, 56, 60, 61, 63, 64, 90, 91, 125, 126, 133, 136]);
 const getPhotoCategory = (number) => objectNumbers.has(number) ? 'objetos' : crowdNumbers.has(number) ? 'multitud' : 'voces-oficios';
-const allPhotoSources = Array.from({ length: 136 }, (_, index) => `foto_${index + 1}.JPG`).concat('fotoantigua1.jpg');
+const allPhotoSources = Array.from({ length: 136 }, (_, index) => `foto_${index + 1}.jpg`).concat('fotoantigua1.jpg');
 if (oldGalleryGrid) {
   oldGalleryGrid.innerHTML = '';
   allPhotoSources.forEach((source) => {
     const number = Number(source.match(/\d+/)?.[0]);
-    const legacyItem = legacyGalleryItems.find((item) => item.querySelector('img').src.endsWith(source));
+    const legacyItem = legacyGalleryItems.find((item) => imageFileName(item.querySelector('img')) === source);
     const item = document.createElement('button');
     item.className = 'gallery-item';
     item.type = 'button';
     item.dataset.category = source === 'fotoantigua1.jpg' ? 'objetos' : getPhotoCategory(number);
-    item.dataset.title = legacyItem?.dataset.title || `Fotografía ${source.replace('.JPG', '').replace('.jpg', '')}`;
+    item.dataset.title = legacyItem?.dataset.title || `Fotografía ${source.replace('.jpg', '').replace('.jpg', '')}`;
     item.dataset.caption = legacyItem?.dataset.caption || 'Imagen del archivo visual del Rastro.';
-    item.innerHTML = `<img src="assets/fotos/${source}" alt="${item.dataset.title}">`;
+    item.innerHTML = `<img src="${offlineAsset(`assets/fotos/${source}`)}" data-source="${source}" alt="${item.dataset.title}">`;
     oldGalleryGrid.append(item);
   });
 }
 const galleryItems = [...document.querySelectorAll('.gallery-item')];
 const categoryConfig = [
-  { id: 'multitud', title: 'Multitud', description: 'Cuerpos, trayectorias, conversaciones y ruido compartido.', cover: 'foto_36.JPG' },
-  { id: 'objetos', title: 'Objetos', description: 'Cosas usadas, encontradas y vueltas a mirar.', cover: 'foto_24.JPG' },
-  { id: 'voces-oficios', title: 'Voces y oficios', description: 'Las personas, los puestos y las formas de hacer mercado.', cover: 'foto_44.JPG' }
+  { id: 'multitud', title: 'Multitud', description: 'Cuerpos, trayectorias, conversaciones y ruido compartido.', cover: 'foto_36.jpg' },
+  { id: 'objetos', title: 'Objetos', description: 'Cosas usadas, encontradas y vueltas a mirar.', cover: 'foto_24.jpg' },
+  { id: 'voces-oficios', title: 'Voces y oficios', description: 'Las personas, los puestos y las formas de hacer mercado.', cover: 'foto_44.jpg' }
 ];
 const getCategoryItems = (category) => galleryItems.filter((item) => item.dataset.category === category.id && !(category.id === 'voces-oficios' && /^Fotografía foto_/i.test(item.dataset.title)));
 
@@ -167,7 +192,7 @@ if (gallerySection && oldGalleryGrid) {
   categoryDialog.innerHTML = '<button class="category-close" type="button" aria-label="Cerrar">×</button><div class="category-dialog-head"><span></span><h2></h2><p></p></div><div class="category-featured"><img src="" alt=""><div><strong></strong><small></small></div></div><div class="category-images"></div>';
   categoryConfig.forEach((category) => {
     const initialItems = galleryItems.filter((item) => item.dataset.category === category.id);
-    const coverItem = initialItems.find((item) => item.querySelector('img').src.endsWith(category.cover)) || initialItems[0];
+    const coverItem = initialItems.find((item) => imageFileName(item.querySelector('img')) === category.cover) || initialItems[0];
     const card = document.createElement('button');
     card.className = 'category-card';
     card.type = 'button';
@@ -205,21 +230,13 @@ if (gallerySection && oldGalleryGrid) {
   categoryDialog.addEventListener('click', (event) => { if (event.target === categoryDialog) categoryDialog.close(); });
 }
 
-fetch('docu/desc_fotos.md')
-  .then((response) => response.text())
-  .then((markdown) => {
-    const titles = new Map();
-    const headingPattern = /^## (foto_\d+\.JPG)\s+[—-]\s+(.+)$/gm;
-    let match;
-    while ((match = headingPattern.exec(markdown))) titles.set(match[1], match[2].trim());
-    document.querySelectorAll('.gallery-item').forEach((item) => {
-      const fileName = item.querySelector('img').src.split('/').pop();
-      if (titles.has(fileName)) item.dataset.title = titles.get(fileName);
-      if (fileName === 'fotoantigua1.jpg') item.dataset.title = 'Mercado antiguo con varios puestos y personas comprando';
-      item.querySelector('img').alt = item.dataset.title;
-    });
-  })
-  .catch(() => {});
+const applyPhotoTitles = (titles) => document.querySelectorAll('.gallery-item').forEach((item) => {
+  const fileName = imageFileName(item.querySelector('img'));
+  if (titles[fileName]) item.dataset.title = titles[fileName];
+  if (fileName === 'fotoantigua1.jpg') item.dataset.title = 'Mercado antiguo con varios puestos y personas comprando';
+  item.querySelector('img').alt = item.dataset.title;
+});
+applyPhotoTitles(window.photoTitles || {});
 
 const archiveSlider = document.querySelector('.archive-placeholder input');
 const modernPhoto = document.querySelector('.archive-after');
@@ -228,7 +245,7 @@ archiveSlider?.addEventListener('input', () => {
   modernPhoto.parentElement.style.setProperty('--split-position', `${archiveSlider.value}%`);
 });
 
-const timeMarkup = `<section id="antiguedad" class="time-section" aria-label="Recorrido por fotografias antiguas"><div class="time-stage"><div class="time-heading"><span>09 / 11 · Archivo temporal</span><strong>Una memoria en capas</strong></div><div class="time-frame">${Array.from({ length: 7 }, (_, index) => `<img src="assets/fotostiempo/antiguedad_${index + 1}.png" alt="Fotografia antigua del Rastro, imagen ${index + 1}" class="time-photo${index === 0 ? ' is-visible' : ''}">`).join('')}<span class="time-counter">01 / 07</span></div><p class="time-instruction">Continua bajando para revelar el paso del tiempo <span>↓</span></p></div></section>`;
+const timeMarkup = `<section id="antiguedad" class="time-section" aria-label="Recorrido por fotografias antiguas"><div class="time-stage"><div class="time-heading"><span>09 / 11 · Archivo temporal</span><strong>Una memoria en capas</strong></div><div class="time-frame">${Array.from({ length: 7 }, (_, index) => `<img src="${offlineAsset(`assets/fotostiempo/antiguedad_${index + 1}.png`)}" data-source="antiguedad_${index + 1}.png" alt="Fotografia antigua del Rastro, imagen ${index + 1}" class="time-photo${index === 0 ? ' is-visible' : ''}">`).join('')}<span class="time-counter">01 / 07</span></div><p class="time-instruction">Continua bajando para revelar el paso del tiempo <span>↓</span></p></div></section>`;
 const miradaSection = document.querySelector('#mirada');
 miradaSection?.insertAdjacentHTML('beforebegin', timeMarkup);
 const timeSection = document.querySelector('.time-section');
